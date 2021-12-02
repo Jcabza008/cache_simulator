@@ -16,6 +16,44 @@
             "externalConsole": false,
             "MIMode": "gdb",
             "preLaunchTask": "CompileTests"
+        },
+        {
+            "name": "FullyAssociative simple",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/simulator",
+            "args": ["--trace-file=../trace_files/gcc.trace", "--cache-type=0", "--rep-policy=0", "--line-count=1", "--line-size=4"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Benchmark",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/simulator",
+            "args": ["--trace-file=trace_files/gcc.trace", "--benchmark"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
         }
     ]
 }

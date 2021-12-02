@@ -22,7 +22,7 @@ namespace cache_simulator
         virtual std::vector<MemAccessDesc> scan(std::istream& is) = 0;
     };
 
-    class Scanner : IScanner
+    class Scanner : public IScanner
     {
         public:
         std::vector<MemAccessDesc> scan(std::istream& is) override;

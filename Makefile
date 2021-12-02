@@ -3,7 +3,7 @@ INCLUDEFLAG = -I include
 LIBSFLAG = -L lib
 CFLAGS = -g -Wall -std=c++14 $(LIBSFLAG) $(INCLUDEFLAG)
 
-CORELIBS = lib/scanner.o
+CORELIBS = lib/scanner.o lib/cache.o lib/rep_policy.o
 
 GTESTFLAGS = `pkg-config gtest gmock --cflags --libs`
 
@@ -57,7 +57,7 @@ lib/:
 	mkdir -p lib
 
 simulator: bin/ lib/main.o $(CORELIBS)
-	$(CC) $(CFLAGS) -o bin/simulator lib/main.o $(CORELIBS)
+	$(CC) $(CFLAGS) -o bin/simulator lib/main.o $(CORELIBS) -lboost_program_options
 
 tests: bin/ lib/tests.o $(CORELIBS)
 	$(CC) $(CFLAGS) -o bin/tests lib/tests.o $(CORELIBS) $(GTESTFLAGS) -lpthread
@@ -72,3 +72,9 @@ lib/tests.o: lib/ $(LIBS)
 # Libs
 lib/scanner.o: lib/
 	$(CC) $(CFLAGS) -c src/scanner.cpp -o lib/scanner.o
+
+lib/cache.o: lib/
+	$(CC) $(CFLAGS) -c src/cache.cpp -o lib/cache.o
+
+lib/rep_policy.o: lib/
+	$(CC) $(CFLAGS) -c src/rep_policy.cpp -o lib/rep_policy.o
