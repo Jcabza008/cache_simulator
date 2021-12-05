@@ -18,9 +18,9 @@ namespace cache_simulator
         std::string traceFile;
         int cacheType;
         int repPolicy;
-        uint32_t lineCount;
-        uint32_t lineSize;
+        uint32_t setCount;
         uint32_t linesPerSet;
+        uint32_t lineSize;
     };
 
     struct CacheSimulatorRunStats
@@ -28,8 +28,8 @@ namespace cache_simulator
         std::string file;
         std::string cacheType;
         std::string repPolicy;
+        uint32_t setCount;
         uint32_t linesPerSet;
-        uint32_t lineCount;
         uint32_t lineSize;
         double hitRate;
     };

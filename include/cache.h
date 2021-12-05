@@ -46,8 +46,8 @@ namespace cache_simulator
     class SetAssociativeCache : public ICache
     {
         public:
-        SetAssociativeCache(uint32_t lineCount, uint32_t lineSize, uint32_t linesPerSet, IReplacementPolicy* repPolicy)
-            : lineSize(lineSize), storage(std::vector<std::vector<int64_t>>(lineCount/linesPerSet, std::vector<int64_t>(linesPerSet, -1))), repPolicy(repPolicy) {}
+        SetAssociativeCache(uint32_t setCount, uint32_t linesPerSet, uint32_t lineSize, IReplacementPolicy* repPolicy)
+            : lineSize(lineSize), storage(std::vector<std::vector<int64_t>>(setCount, std::vector<int64_t>(linesPerSet, -1))), repPolicy(repPolicy) {}
 
         bool accessMem(MemAccessDesc& desc) override;
 
