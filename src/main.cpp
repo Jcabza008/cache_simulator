@@ -29,8 +29,8 @@ std::vector<uint32_t> fullyAssociativeLinesPerSet = {1, 2, 4, 8, 16, 32, 64, 128
 std::vector<uint32_t> fullyAssociativeLineSizes = {4, 8, 16, 32, 64, 128, 256};
 
 std::vector<int> setAssociativeRepPolicies = {0, 1};
-std::vector<uint32_t> setAssociativeSetCount = {2, 4, 8, 16, 32, 64, 128, 256};
-std::vector<uint32_t> setAssociativeLinesPerSet = {2, 4, 8, 16, 32, 64, 128, 256};
+std::vector<uint32_t> setAssociativeSetCount = {1, 2, 4, 8, 16, 32, 64, 128, 256};
+std::vector<uint32_t> setAssociativeLinesPerSet = {1, 2, 4, 8, 16, 32, 64, 128, 256};
 std::vector<uint32_t> setAssociativeLineSizes = {4, 8, 16, 32, 64, 128, 256};
 
 double run(CacheSimulatorConfig config)
@@ -101,8 +101,8 @@ void benchmark(std::string traceFile)
                 1,
                 0,
                 directMapSetCounts[i],
-                directMapLineSizes[j],
-                1
+                1,
+                directMapLineSizes[j]
             };
 
             double hitRate = run(config);
@@ -181,7 +181,7 @@ void benchmark(std::string traceFile)
         }
     }
 
-    std::ofstream out("benchmark_stats.csv");
+    std::ofstream out("benchmark_stats_" + base_filename + ".csv");
     out << "File,Cache Type,Replacement Policy,Set Count,Lines/Set,Line Size,Hit Rate" << std::endl;
 
     for(size_t i = 0; i < stats.size(); i++)
