@@ -21,16 +21,16 @@ using namespace cache_simulator;
 namespace po = boost::program_options;
 
  // Benchmark configs
-std::vector<uint32_t> directMapLineCounts = {1, 2, 4, 8, 16, 32, 64, 128, 256};
+std::vector<uint32_t> directMapSetCounts = {1, 2, 4, 8, 16, 32, 64, 128, 256};
 std::vector<uint32_t> directMapLineSizes = {4, 8, 16, 32, 64, 128, 256};
 
 std::vector<int> fullyAssociativeRepPolicies = {0, 1};
-std::vector<uint32_t> fullyAssociativeLineCounts = {1, 2, 4, 8, 16, 32, 64, 128, 256};
+std::vector<uint32_t> fullyAssociativeLinesPerSet = {1, 2, 4, 8, 16, 32, 64, 128, 256};
 std::vector<uint32_t> fullyAssociativeLineSizes = {4, 8, 16, 32, 64, 128, 256};
 
 std::vector<int> setAssociativeRepPolicies = {0, 1};
-std::vector<uint32_t> setAssociativeLinesPerSet = {2, 4, 8, 16, 32, 64, 128, 256};
-std::vector<uint32_t> setAssociativeLineCounts = {2, 4, 8, 16, 32, 64, 128, 256};
+std::vector<uint32_t> setAssociativeSetCount = {1, 2, 4, 8, 16, 32, 64, 128, 256};
+std::vector<uint32_t> setAssociativeLinesPerSet = {1, 2, 4, 8, 16, 32, 64, 128, 256};
 std::vector<uint32_t> setAssociativeLineSizes = {4, 8, 16, 32, 64, 128, 256};
 
 double run(CacheSimulatorConfig config)
@@ -39,10 +39,10 @@ double run(CacheSimulatorConfig config)
     switch(config.repPolicy)
     {
         case 0:
-            repPolicy = new FIFORepPolicy(config.lineCount/config.linesPerSet);
+            repPolicy = new FIFORepPolicy(config.setCount);
             break;
         case 1:
-            repPolicy = new LRURepPolicy(config.lineCount/config.linesPerSet, config.linesPerSet);
+            repPolicy = new LRURepPolicy(config.setCount, config.linesPerSet);
             break;
         default:
             std::cout << "Invalid replacement policy" << std::endl;
@@ -53,13 +53,13 @@ double run(CacheSimulatorConfig config)
     switch(config.cacheType)
     {
         case 0:
-            cache = new FullyAssociativeCache(config.lineCount, config.lineSize, repPolicy);
+            cache = new FullyAssociativeCache(config.linesPerSet, config.lineSize, repPolicy);
             break;
         case 1:
-            cache = new DirectMapCache(config.lineCount, config.lineSize);
+            cache = new DirectMapCache(config.setCount, config.lineSize);
             break;
         case 2:
-            cache = new SetAssociativeCache(config.lineCount, config.lineSize, config.linesPerSet, repPolicy);
+            cache = new SetAssociativeCache(config.setCount, config.linesPerSet, config.lineSize, repPolicy);
             break;
         default:
             std::cout << "Invalid cache type" << std::endl;
@@ -92,7 +92,7 @@ void benchmark(std::string traceFile)
     std::vector<CacheSimulatorRunStats> stats;
 
     // Direct Map
-    for(size_t i = 0; i < directMapLineCounts.size(); i++)
+    for(size_t i = 0; i < directMapSetCounts.size(); i++)
     {
         for(size_t j = 0; j < directMapLineSizes.size(); j++)
         {
@@ -100,9 +100,9 @@ void benchmark(std::string traceFile)
                 traceFile,
                 1,
                 0,
-                directMapLineCounts[i],
-                directMapLineSizes[j],
-                1
+                directMapSetCounts[i],
+                1,
+                directMapLineSizes[j]
             };
 
             double hitRate = run(config);
@@ -110,8 +110,8 @@ void benchmark(std::string traceFile)
                 base_filename,
                 "Direct Map",
                 "N/A",
+                directMapSetCounts[i],
                 1,
-                directMapLineCounts[i],
                 directMapLineSizes[j],
                 hitRate
             });
@@ -121,7 +121,7 @@ void benchmark(std::string traceFile)
     // Fully Associative
     for(size_t i = 0; i < fullyAssociativeRepPolicies.size(); i++)
     {
-        for(size_t j = 0; j < fullyAssociativeLineCounts.size(); j++)
+        for(size_t j = 0; j < fullyAssociativeLinesPerSet.size(); j++)
         {
             for(size_t k = 0; k < fullyAssociativeLineSizes.size(); k++)
             {
@@ -129,9 +129,9 @@ void benchmark(std::string traceFile)
                     traceFile,
                     0,
                     fullyAssociativeRepPolicies[i],
-                    fullyAssociativeLineCounts[j],
-                    fullyAssociativeLineSizes[k],
-                    fullyAssociativeLineCounts[j]
+                    1,
+                    fullyAssociativeLinesPerSet[j],
+                    fullyAssociativeLineSizes[k]
                 };
 
                 double hitRate = run(config);
@@ -139,8 +139,8 @@ void benchmark(std::string traceFile)
                     base_filename,
                     "Fully Associative",
                     fullyAssociativeRepPolicies[i] == 0 ? "FIFO" : "LRU",
-                    fullyAssociativeLineCounts[j],
-                    fullyAssociativeLineCounts[j],
+                    1,
+                    fullyAssociativeLinesPerSet[j],
                     fullyAssociativeLineSizes[k],
                     hitRate
                 });
@@ -151,22 +151,19 @@ void benchmark(std::string traceFile)
     // Set Associative
     for(size_t i = 0; i < setAssociativeRepPolicies.size(); i++)
     {
-        for(size_t j = 0; j < setAssociativeLinesPerSet.size(); j++)
+        for(size_t j = 0; j < setAssociativeSetCount.size(); j++)
         {
-            for(size_t k = 0; k < fullyAssociativeLineCounts.size(); k++)
+            for(size_t k = 0; k < setAssociativeLinesPerSet.size(); k++)
             {
-                for(size_t l = 0; l < fullyAssociativeLineSizes.size(); l++)
+                for(size_t l = 0; l < setAssociativeLineSizes.size(); l++)
                 {
-                    if(setAssociativeLinesPerSet[j] >= setAssociativeLineCounts[k])
-                        continue;
-
                     auto config = CacheSimulatorConfig{
                         traceFile,
                         2,
                         setAssociativeRepPolicies[i],
-                        setAssociativeLineCounts[k],
-                        setAssociativeLineSizes[l],
-                        setAssociativeLinesPerSet[j]
+                        setAssociativeSetCount[k],
+                        setAssociativeLinesPerSet[j],
+                        setAssociativeLineSizes[l]
                     };
 
                     double hitRate = run(config);
@@ -174,8 +171,8 @@ void benchmark(std::string traceFile)
                         base_filename,
                         "Set Associative",
                         setAssociativeRepPolicies[i] == 0 ? "FIFO" : "LRU",
+                        setAssociativeSetCount[k],
                         setAssociativeLinesPerSet[j],
-                        setAssociativeLineCounts[k],
                         setAssociativeLineSizes[l],
                         hitRate
                     });
@@ -184,16 +181,16 @@ void benchmark(std::string traceFile)
         }
     }
 
-    std::ofstream out("benchmark_stats.csv");
-    out << "File,Cache Type,Replacement Policy,Lines/Set,Line Count,Line Size,Hit Rate" << std::endl;
+    std::ofstream out("benchmark_stats_" + base_filename + ".csv");
+    out << "File,Cache Type,Replacement Policy,Set Count,Lines/Set,Line Size,Hit Rate" << std::endl;
 
     for(size_t i = 0; i < stats.size(); i++)
     {
         out << stats[i].file << ",";
         out << stats[i].cacheType << ",";
         out << stats[i].repPolicy << ",";
+        out << stats[i].setCount << ",";
         out << stats[i].linesPerSet << ",";
-        out << stats[i].lineCount << ",";
         out << stats[i].lineSize << ",";
         out << stats[i].hitRate << std::endl;
     }
@@ -211,9 +208,9 @@ int main(int argc, char** argv)
         ("trace-file", po::value<std::string>(&config.traceFile), "trace file to run (required)")
         ("cache-type", po::value<int>(&config.cacheType)->default_value(1), "cache type. Supported: fully associative = 0, direct map = 1, set associative = 2")
         ("rep-policy", po::value<int>(&config.repPolicy)->default_value(0), "replacement policy. Supported: FIFO = 0, LRU = 1")
-        ("line-count", po::value<uint32_t>(&config.lineCount)->default_value(32), "number of lines in the cache")
-        ("line-size", po::value<uint32_t>(&config.lineSize)->default_value(8), "number of bytes per line")
+        ("set-count", po::value<uint32_t>(&config.setCount)->default_value(32), "number of lines in the cache")
         ("lines-per-set", po::value<uint32_t>(&config.linesPerSet)->default_value(1), "number of lines in each set")
+        ("line-size", po::value<uint32_t>(&config.lineSize)->default_value(8), "number of bytes per line")
         ("benchmark", "run default benchmark")
     ;
 

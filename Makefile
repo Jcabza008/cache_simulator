@@ -45,7 +45,7 @@ run_clang_tidy:
 run_tests: tests
 	./bin/tests
 
-all: pathfinder tests
+all: simulator tests
 
 clean:
 	rm -rf bin lib
